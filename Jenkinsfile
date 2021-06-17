@@ -1,7 +1,13 @@
 pipeline {
-  agent any
+  agent none
   stages {
     stage('build') {
+      agent {
+        docker {
+          image 'maven:3.6.3-jdk-11-slim'
+        }
+
+      }
       steps {
         echo 'compile sysfoo app'
         sh 'mvn compile'
@@ -9,6 +15,12 @@ pipeline {
     }
 
     stage('test') {
+      agent {
+        docker {
+          image 'maven:3.6.3-jdk-11-slim'
+        }
+
+      }
       steps {
         echo 'test sysfoo app'
         sh 'mvn clean test'
@@ -16,15 +28,29 @@ pipeline {
     }
 
     stage('package') {
+      agent {
+        docker {
+          image 'maven:3.6.3-jdk-11-slim'
+        }
+
+      }
       steps {
         echo 'package sysfoo app'
         sh 'mvn package -DskipTests'
       }
     }
 
-    stage('artifact') {
+    stage('DockerBnP') {
       steps {
-        archiveArtifacts 'target/*war'
+        script {
+          docker.withRegistry('https://index.docker.io/v1/', 'dockerlogin') {
+            def dockerImage = docker.build("viswa1409/sysfoo:v${env.BUILD_ID}", "./")
+            dockerImage.push()
+            dockerImage.push("latest")
+            dockerImage.push("dev")
+          }
+        }
+
       }
     }
 
