@@ -40,18 +40,6 @@ pipeline {
       }
     }
 
-    stage('artifact') {
-      agent {
-        docker {
-          image 'maven:3.6.3-jdk-11-slim'
-        }
-
-      }
-      steps {
-        archiveArtifacts 'target/*war'
-      }
-    }
-
     stage('DockerBnP') {
       steps {
         script {
